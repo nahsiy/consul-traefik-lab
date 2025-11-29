@@ -33,8 +33,11 @@ Environnement local pour apprendre Consul (Service Discovery) et Traefik (Revers
 # Démarrer l'infra
 cd docker && docker compose up -d
 
-# Enregistrer les services dans Consul
+# Option A : Enregistrer les services avec Ansible
 cd ansible && ansible-playbook playbooks/register-services.yml
+
+# Option B : Enregistrer les services avec Terraform (recommandé)
+cd terraform && terraform init && terraform apply
 
 # Arrêter l'infra
 cd docker && docker compose down
@@ -65,4 +68,4 @@ consul-traefik-lab/
 - 🔍 **Consul** - Service Discovery & KV Store
 - 🔀 **Traefik** - Reverse Proxy dynamique
 - 📜 **Ansible** - Automatisation de configuration
-- 🏗️ **Terraform** - Infrastructure as Code (à venir)
+- 🏗️ **Terraform** - Infrastructure as Code

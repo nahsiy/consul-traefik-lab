@@ -1,0 +1,35 @@
+# Terraform
+# =========
+
+# Fichiers d'état local (contient l'état de l'infra)
+*.tfstate
+*.tfstate.*
+
+# Répertoire crash logs
+crash.log
+crash.*.log
+
+# Fichiers de variables locales (peuvent contenir des secrets)
+*.tfvars
+*.tfvars.json
+!example.tfvars
+
+# Répertoire des providers téléchargés
+.terraform/
+
+# Lock file des providers (on peut le commiter, mais optionnel pour un lab)
+.terraform.lock.hcl
+
+# Fichiers de plan sauvegardés
+*.tfplan
+
+# Fichiers de backup d'état
+*.backup
+
+# macOS
+.DS_Store
+
+# IDE
+.idea/
+*.swp
+*.swo
