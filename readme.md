@@ -50,6 +50,8 @@ cd docker && docker compose down
 | Dashboard | http://localhost:8080 | Page d'accueil du lab |
 | Consul UI | http://localhost:8500 | Service Discovery |
 | Traefik | http://localhost:8081 | Dashboard Traefik |
+| Prometheus | http://localhost:9090 | Métriques & Queries |
+| Grafana | http://localhost:3000 | Dashboards de monitoring |
 
 ## Structure
 
@@ -67,5 +69,7 @@ consul-traefik-lab/
 - 🐳 **Docker** - Conteneurisation
 - 🔍 **Consul** - Service Discovery & KV Store
 - 🔀 **Traefik** - Reverse Proxy dynamique
+- 📊 **Prometheus** - Collecte de métriques
+- 📈 **Grafana** - Visualisation & Dashboards
 - 📜 **Ansible** - Automatisation de configuration
 - 🏗️ **Terraform** - Infrastructure as Code

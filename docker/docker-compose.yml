@@ -58,9 +58,71 @@ services:
       - --providers.consulcatalog.exposedByDefault=false
       # Entrypoint HTTP
       - --entrypoints.web.address=:80
+      # ============================================
+      # MÉTRIQUES PROMETHEUS
+      # ============================================
+      # Active l'endpoint /metrics pour Prometheus
+      - --metrics.prometheus=true
+      # Ajoute des métriques par entrypoint (web, etc.)
+      - --metrics.prometheus.entryPoint=metrics
+      # Ajoute un entrypoint dédié aux métriques (port 8082)
+      - --entrypoints.metrics.address=:8082
 
     depends_on:
       - consul
+    
+    networks:
+      - lab-network
+
+  # ============================================
+  # PROMETHEUS - Collecte des métriques
+  # ============================================
+  prometheus:
+    image: prom/prometheus:latest
+    
+    ports:
+      - "9090:9090"   # Interface web Prometheus
+    
+    volumes:
+      # Configuration Prometheus
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      # Permet le rechargement de config via API
+      - '--web.enable-lifecycle'
+    
+    depends_on:
+      - traefik
+    
+    networks:
+      - lab-network
+
+  # ============================================
+  # GRAFANA - Visualisation des métriques
+  # ============================================
+  grafana:
+    image: grafana/grafana:latest
+    
+    ports:
+      - "3000:3000"   # Interface web Grafana
+    
+    environment:
+      # Désactive le login pour le lab (pas en prod !)
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      # Désactive les analytics
+      - GF_ANALYTICS_REPORTING_ENABLED=false
+    
+    volumes:
+      # Provisionning automatique des datasources
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      # Dashboards pré-configurés
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+    
+    depends_on:
+      - prometheus
     
     networks:
       - lab-network

@@ -1,0 +1,64 @@
+# ============================================
+# PROMETHEUS - Configuration
+# ============================================
+# Prometheus scrape (collecte) les métriques depuis les endpoints /metrics
+# des différents services à intervalle régulier.
+
+global:
+  # Fréquence de collecte par défaut
+  scrape_interval: 15s
+  # Timeout pour chaque scrape
+  scrape_timeout: 10s
+
+# ============================================
+# JOBS DE SCRAPING
+# ============================================
+# Chaque job définit une cible à scraper
+
+scrape_configs:
+  # ------------------------------------------
+  # Prometheus lui-même (pour monitorer Prometheus)
+  # ------------------------------------------
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # ------------------------------------------
+  # Traefik - Métriques du reverse proxy
+  # ------------------------------------------
+  # Traefik expose des métriques très riches :
+  # - Nombre de requêtes par service/route
+  # - Temps de réponse (latence)
+  # - Codes HTTP (2xx, 4xx, 5xx)
+  - job_name: 'traefik'
+    static_configs:
+      - targets: ['traefik:8082']
+    # Labels ajoutés à toutes les métriques de ce job
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: 'traefik'
+
+  # ------------------------------------------
+  # Consul - Métriques du service discovery
+  # ------------------------------------------
+  # Consul expose des métriques sur la santé des services
+  # Note: nécessite d'activer telemetry dans Consul (optionnel)
+  # - job_name: 'consul'
+  #   static_configs:
+  #     - targets: ['consul:8500']
+  #   metrics_path: /v1/agent/metrics
+  #   params:
+  #     format: ['prometheus']
+
+# ============================================
+# 💡 EXERCICE : Ajouter d'autres cibles
+# ============================================
+# Si vous ajoutez un service avec un endpoint /metrics,
+# ajoutez un nouveau job ici.
+#
+# Exemple pour une app Node.js avec prom-client :
+# - job_name: 'my-node-app'
+#   static_configs:
+#     - targets: ['my-app:3000']
+#   metrics_path: /metrics

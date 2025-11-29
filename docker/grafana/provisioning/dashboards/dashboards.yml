@@ -1,0 +1,17 @@
+# ============================================
+# GRAFANA - Provisioning des Dashboards
+# ============================================
+# Ce fichier indique à Grafana où trouver les dashboards pré-configurés
+
+apiVersion: 1
+
+providers:
+  - name: 'default'
+    orgId: 1
+    folder: ''
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      # Chemin vers les fichiers JSON des dashboards
+      path: /var/lib/grafana/dashboards
