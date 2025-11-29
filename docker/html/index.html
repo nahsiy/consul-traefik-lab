@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🚀 Consul-Traefik Lab</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      min-height: 100vh;
+      color: #fff;
+      padding: 40px 20px;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    header {
+      text-align: center;
+      margin-bottom: 50px;
+    }
+    
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      background: linear-gradient(90deg, #00d9ff, #00ff88);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .subtitle {
+      color: #8892b0;
+      font-size: 1.1rem;
+    }
+    
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 25px;
+      margin-bottom: 50px;
+    }
+    
+    .service-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 30px;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+    
+    .service-card:hover {
+      transform: translateY(-5px);
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(0, 217, 255, 0.5);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+    
+    .service-icon {
+      font-size: 3rem;
+      margin-bottom: 15px;
+    }
+    
+    .service-name {
+      font-size: 1.4rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    
+    .service-desc {
+      color: #8892b0;
+      font-size: 0.9rem;
+      margin-bottom: 15px;
+    }
+    
+    .service-url {
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 0.85rem;
+      color: #00d9ff;
+      background: rgba(0, 217, 255, 0.1);
+      padding: 8px 12px;
+      border-radius: 6px;
+      display: inline-block;
+    }
+    
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 15px;
+      font-size: 0.85rem;
+    }
+    
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #00ff88;
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
+    .architecture {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 30px;
+      margin-bottom: 30px;
+    }
+    
+    .architecture h2 {
+      margin-bottom: 20px;
+      color: #00ff88;
+    }
+    
+    .architecture pre {
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 0.85rem;
+      color: #8892b0;
+      overflow-x: auto;
+      line-height: 1.6;
+    }
+    
+    .tools-learned {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 30px;
+    }
+    
+    .tool-badge {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .tool-badge.active {
+      background: rgba(0, 255, 136, 0.2);
+      border-color: #00ff88;
+      color: #00ff88;
+    }
+    
+    footer {
+      text-align: center;
+      margin-top: 50px;
+      color: #8892b0;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🚀 Consul-Traefik Lab</h1>
+      <p class="subtitle">Service Discovery & Dynamic Routing sur Mac M4</p>
+    </header>
+    
+    <div class="services-grid">
+      <a href="http://localhost:8500" target="_blank" class="service-card">
+        <div class="service-icon">🔍</div>
+        <div class="service-name">Consul</div>
+        <div class="service-desc">Service Discovery & Configuration. Visualisez les services enregistrés et leur état de santé.</div>
+        <div class="service-url">localhost:8500</div>
+        <div class="status">
+          <span class="status-dot"></span>
+          <span>Service Discovery</span>
+        </div>
+      </a>
+      
+      <a href="http://localhost:8081" target="_blank" class="service-card">
+        <div class="service-icon">🔀</div>
+        <div class="service-name">Traefik</div>
+        <div class="service-desc">Reverse Proxy & Load Balancer. Dashboard pour voir le routage dynamique.</div>
+        <div class="service-url">localhost:8081</div>
+        <div class="status">
+          <span class="status-dot"></span>
+          <span>Reverse Proxy</span>
+        </div>
+      </a>
+      
+      <a href="http://localhost:8080" target="_blank" class="service-card">
+        <div class="service-icon">🌐</div>
+        <div class="service-name">Nginx</div>
+        <div class="service-desc">Serveur web servant cette page. Accès direct sans passer par Traefik.</div>
+        <div class="service-url">localhost:8080</div>
+        <div class="status">
+          <span class="status-dot"></span>
+          <span>Web Server</span>
+        </div>
+      </a>
+    </div>
+    
+    <div class="architecture">
+      <h2>📐 Architecture</h2>
+      <pre>
+┌─────────────────────────────────────────────────────────────┐
+│                        Votre Mac M4                         │
+└─────────────────────────────────────────────────────────────┘
+                              │
+         ┌────────────────────┼────────────────────┐
+         ▼                    ▼                    ▼
+    :80 (Traefik)       :8081 (Dashboard)    :8500 (Consul)
+         │
+         ▼
+┌─────────────────┐   découvre    ┌─────────────────┐
+│    Traefik      │◄────────────►│     Consul      │
+│  (Reverse Proxy)│   services    │(Service Registry)│
+└────────┬────────┘              └─────────────────┘
+         │                               ▲
+         │ route                         │ s'enregistre
+         ▼                               │
+┌─────────────────┐                      │
+│     Nginx       │──────────────────────┘
+│   (Cette page)  │
+└─────────────────┘
+      </pre>
+    </div>
+    
+    <div style="text-align: center;">
+      <h3 style="margin-bottom: 15px; color: #8892b0;">Outils en cours d'apprentissage</h3>
+      <div class="tools-learned">
+        <span class="tool-badge active">🐳 Docker</span>
+        <span class="tool-badge active">📦 Docker Compose</span>
+        <span class="tool-badge active">🔍 Consul</span>
+        <span class="tool-badge active">🔀 Traefik</span>
+        <span class="tool-badge">📜 Ansible</span>
+        <span class="tool-badge">🏗️ Terraform</span>
+      </div>
+    </div>
+    
+    <footer>
+      <p>Lab créé le 29 novembre 2025 • Prochaine étape : Ansible pour automatiser l'enregistrement des services</p>
+    </footer>
+  </div>
+</body>
+</html>

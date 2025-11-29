@@ -1,0 +1,33 @@
+---
+# TODO: Nom du playbook
+- name: Enregistrer les services dans Consul
+  # TODO: Sur quels hosts exécuter ?
+  hosts: localhost
+
+  vars:
+    # Adresse de l'API Consul
+    consul_url: "http://localhost:8500"
+
+  tasks:
+    - name: Enregistrer nginx dans Consul avec tags Traefik
+      ansible.builtin.uri:
+        url: "{{ consul_url }}/v1/agent/service/register"
+        method: PUT
+        body:
+          Name: "nginx"
+          Port: 80
+          Address: "nginx"
+          Tags:
+            - "traefik.enable=true"
+            - "traefik.http.routers.nginx.rule=Host(`nginx.localhost`)"
+            - "traefik.http.routers.nginx.entrypoints=web"
+          Check:
+            HTTP: "http://nginx:80"
+            Interval: "10s"
+        body_format: json
+        status_code: 200
+      register: result
+
+    - name: Afficher le résultat
+      ansible.builtin.debug:
+        msg: "✅ Service nginx enregistré dans Consul !"

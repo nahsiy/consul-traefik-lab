@@ -1,0 +1,72 @@
+# Docker Compose file
+# Documentation: https://docs.docker.com/compose/compose-file/
+
+services:
+  # TODO: Nommez votre premier service (ex: web, nginx, frontend...)
+  nginx:
+    # TODO: Quelle image Docker utiliser ? (ex: nginx:latest, nginx:alpine...)
+    image: nginx:alpine
+    
+    # TODO: Mapper le port 80 du container vers un port de votre Mac
+    # Format: "PORT_LOCAL:PORT_CONTAINER"
+    ports:
+      - "8080:80"
+    
+    # TODO: Monter un volume pour servir votre propre page HTML
+    # Format: "./chemin/local:chemin/dans/container"
+    # Indice: nginx sert les fichiers depuis /usr/share/nginx/html
+    volumes:
+      - ./html:/usr/share/nginx/html:ro
+    
+    # TODO: Attacher ce service à un réseau custom
+    networks:
+      - lab-network
+
+  # Service Consul - Service Discovery & Configuration
+  consul:
+    image: hashicorp/consul:latest
+
+    # Port 8500 = API HTTP + Interface Web
+    ports:
+      - "8500:8500"
+
+    # Mode développement : un seul nœud, données en mémoire
+    # -ui : active l'interface web
+    # -client 0.0.0.0 : accepte les connexions de n'importe où
+    command: agent -dev -ui -client 0.0.0.0
+
+    # Même réseau que les autres services
+    networks:
+      - lab-network
+
+  # TODO: Ajouter le service Traefik
+  traefik:
+    image: traefik:v3.2
+    
+    ports:
+      - "80:80"       # Trafic HTTP entrant
+      - "8081:8080"   # Dashboard Traefik
+    
+    command:
+      # Active le dashboard (ne pas faire en prod sans auth !)
+      - --api.insecure=true
+      # Logs pour debug
+      - --log.level=DEBUG
+      # Provider Consul Catalog : découvre les services depuis Consul
+      - --providers.consulcatalog.endpoint.address=consul:8500
+      # Expose seulement les services tagués explicitement
+      - --providers.consulcatalog.exposedByDefault=false
+      # Entrypoint HTTP
+      - --entrypoints.web.address=:80
+
+    depends_on:
+      - consul
+    
+    networks:
+      - lab-network
+
+# TODO: Déclarer le réseau custom
+networks:
+  lab-network:
+    driver: bridge
+  
