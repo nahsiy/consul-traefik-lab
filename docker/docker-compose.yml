@@ -123,6 +123,44 @@ services:
     
     depends_on:
       - prometheus
+      - loki
+    
+    networks:
+      - lab-network
+
+  # ============================================
+  # LOKI - Agrégation des logs (comme Prometheus pour les logs)
+  # ============================================
+  loki:
+    image: grafana/loki:latest
+    
+    ports:
+      - "3100:3100"   # API Loki
+    
+    command: -config.file=/etc/loki/local-config.yaml
+    
+    volumes:
+      - ./loki/loki-config.yml:/etc/loki/local-config.yaml:ro
+    
+    networks:
+      - lab-network
+
+  # ============================================
+  # PROMTAIL - Collecteur de logs (envoie les logs à Loki)
+  # ============================================
+  promtail:
+    image: grafana/promtail:latest
+    
+    volumes:
+      # Config Promtail
+      - ./promtail/promtail-config.yml:/etc/promtail/config.yml:ro
+      # Accès aux logs Docker
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    
+    command: -config.file=/etc/promtail/config.yml
+    
+    depends_on:
+      - loki
     
     networks:
       - lab-network

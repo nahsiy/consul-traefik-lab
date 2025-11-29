@@ -1,0 +1,45 @@
+# ============================================
+# LOKI - Configuration
+# ============================================
+# Loki stocke et indexe les logs reçus de Promtail
+# C'est comme Prometheus, mais pour les logs au lieu des métriques
+
+auth_enabled: false
+
+server:
+  http_listen_port: 3100
+
+# Où stocker les données
+common:
+  path_prefix: /loki
+  storage:
+    filesystem:
+      chunks_directory: /loki/chunks
+      rules_directory: /loki/rules
+  replication_factor: 1
+  ring:
+    kvstore:
+      store: inmemory
+
+# Configuration du schéma de stockage
+schema_config:
+  configs:
+    - from: 2020-10-24
+      store: tsdb
+      object_store: filesystem
+      schema: v13
+      index:
+        prefix: index_
+        period: 24h
+
+# Limites (augmentées pour le lab)
+limits_config:
+  # Permet d'ingérer des logs de n'importe quelle date
+  reject_old_samples: false
+  # Augmente la limite de taille par requête
+  max_entries_limit_per_query: 5000
+
+# Durée de rétention des logs
+# compactor:
+#   retention_enabled: true
+#   retention_delete_delay: 2h

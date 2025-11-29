@@ -51,7 +51,8 @@ cd docker && docker compose down
 | Consul UI | http://localhost:8500 | Service Discovery |
 | Traefik | http://localhost:8081 | Dashboard Traefik |
 | Prometheus | http://localhost:9090 | Métriques & Queries |
-| Grafana | http://localhost:3000 | Dashboards de monitoring |
+| Grafana | http://localhost:3000 | Dashboards & Logs |
+| Loki | http://localhost:3100 | API Logs (utilisé par Grafana) |
 
 ## Structure
 
@@ -71,5 +72,6 @@ consul-traefik-lab/
 - 🔀 **Traefik** - Reverse Proxy dynamique
 - 📊 **Prometheus** - Collecte de métriques
 - 📈 **Grafana** - Visualisation & Dashboards
+- 📝 **Loki** - Agrégation de logs
 - 📜 **Ansible** - Automatisation de configuration
 - 🏗️ **Terraform** - Infrastructure as Code
