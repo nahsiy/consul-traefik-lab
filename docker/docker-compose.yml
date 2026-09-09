@@ -1,172 +1,118 @@
-# Docker Compose file
-# Documentation: https://docs.docker.com/compose/compose-file/
+---
+name: consul-traefik-lab
 
 services:
-  # TODO: Nommez votre premier service (ex: web, nginx, frontend...)
   nginx:
-    # TODO: Quelle image Docker utiliser ? (ex: nginx:latest, nginx:alpine...)
-    image: nginx:alpine
-    
-    # TODO: Mapper le port 80 du container vers un port de votre Mac
-    # Format: "PORT_LOCAL:PORT_CONTAINER"
+    image: nginx:1.31.5-alpine
     ports:
-      - "8080:80"
-    
-    # TODO: Monter un volume pour servir votre propre page HTML
-    # Format: "./chemin/local:chemin/dans/container"
-    # Indice: nginx sert les fichiers depuis /usr/share/nginx/html
+      - "127.0.0.1:8080:80"
     volumes:
       - ./html:/usr/share/nginx/html:ro
-    
-    # TODO: Attacher ce service à un réseau custom
     networks:
       - lab-network
 
-  # Service Consul - Service Discovery & Configuration
   consul:
-    image: hashicorp/consul:latest
-
-    # Port 8500 = API HTTP + Interface Web
+    image: hashicorp/consul:2.0.3
     ports:
-      - "8500:8500"
-
-    # Mode développement : un seul nœud, données en mémoire
-    # -ui : active l'interface web
-    # -client 0.0.0.0 : accepte les connexions de n'importe où
+      - "127.0.0.1:8500:8500"
     command: agent -dev -ui -client 0.0.0.0
-
-    # Même réseau que les autres services
+    healthcheck:
+      test: ["CMD", "consul", "members"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
     networks:
       - lab-network
 
-  # TODO: Ajouter le service Traefik
   traefik:
-    image: traefik:v3.2
-    
+    image: traefik:v3.7.12
     ports:
-      - "80:80"       # Trafic HTTP entrant
-      - "8081:8080"   # Dashboard Traefik
-    
+      - "127.0.0.1:8088:80"
+      - "127.0.0.1:8081:8080"
     command:
-      # Active le dashboard (ne pas faire en prod sans auth !)
       - --api.insecure=true
-      # Logs pour debug
-      - --log.level=DEBUG
-      # Provider Consul Catalog : découvre les services depuis Consul
+      - --log.level=INFO
       - --providers.consulcatalog.endpoint.address=consul:8500
-      # Expose seulement les services tagués explicitement
       - --providers.consulcatalog.exposedByDefault=false
-      # Entrypoint HTTP
       - --entrypoints.web.address=:80
-      # ============================================
-      # MÉTRIQUES PROMETHEUS
-      # ============================================
-      # Active l'endpoint /metrics pour Prometheus
       - --metrics.prometheus=true
-      # Ajoute des métriques par entrypoint (web, etc.)
       - --metrics.prometheus.entryPoint=metrics
-      # Ajoute un entrypoint dédié aux métriques (port 8082)
       - --entrypoints.metrics.address=:8082
-
     depends_on:
-      - consul
-    
+      consul:
+        condition: service_healthy
     networks:
       - lab-network
 
-  # ============================================
-  # PROMETHEUS - Collecte des métriques
-  # ============================================
   prometheus:
-    image: prom/prometheus:latest
-    
+    image: prom/prometheus:v3.14.0
     ports:
-      - "9090:9090"   # Interface web Prometheus
-    
+      - "127.0.0.1:9090:9090"
     volumes:
-      # Configuration Prometheus
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-    
+      - prometheus-data:/prometheus
     command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-      # Permet le rechargement de config via API
-      - '--web.enable-lifecycle'
-    
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --web.enable-lifecycle
     depends_on:
       - traefik
-    
     networks:
       - lab-network
 
-  # ============================================
-  # GRAFANA - Visualisation des métriques
-  # ============================================
   grafana:
-    image: grafana/grafana:latest
-    
+    image: grafana/grafana:13.2.1
     ports:
-      - "3000:3000"   # Interface web Grafana
-    
+      - "127.0.0.1:3000:3000"
     environment:
-      # Désactive le login pour le lab (pas en prod !)
       - GF_AUTH_ANONYMOUS_ENABLED=true
-      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
-      # Désactive les analytics
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
       - GF_ANALYTICS_REPORTING_ENABLED=false
-    
     volumes:
-      # Provisionning automatique des datasources
       - ./grafana/provisioning:/etc/grafana/provisioning:ro
-      # Dashboards pré-configurés
       - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
-    
+      - grafana-data:/var/lib/grafana
     depends_on:
       - prometheus
       - loki
-    
     networks:
       - lab-network
 
-  # ============================================
-  # LOKI - Agrégation des logs (comme Prometheus pour les logs)
-  # ============================================
   loki:
-    image: grafana/loki:latest
-    
+    image: grafana/loki:3.7.7
     ports:
-      - "3100:3100"   # API Loki
-    
+      - "127.0.0.1:3100:3100"
     command: -config.file=/etc/loki/local-config.yaml
-    
     volumes:
       - ./loki/loki-config.yml:/etc/loki/local-config.yaml:ro
-    
+      - loki-data:/loki
     networks:
       - lab-network
 
-  # ============================================
-  # PROMTAIL - Collecteur de logs (envoie les logs à Loki)
-  # ============================================
-  promtail:
-    image: grafana/promtail:latest
-    
+  alloy:
+    image: grafana/alloy:v1.19.2
+    ports:
+      - "127.0.0.1:12345:12345"
     volumes:
-      # Config Promtail
-      - ./promtail/promtail-config.yml:/etc/promtail/config.yml:ro
-      # Accès aux logs Docker
+      - ./alloy/config.alloy:/etc/alloy/config.alloy:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
-    
-    command: -config.file=/etc/promtail/config.yml
-    
+      - alloy-data:/var/lib/alloy/data
+    command:
+      - run
+      - --server.http.listen-addr=0.0.0.0:12345
+      - --storage.path=/var/lib/alloy/data
+      - /etc/alloy/config.alloy
     depends_on:
       - loki
-    
     networks:
       - lab-network
 
-# TODO: Déclarer le réseau custom
 networks:
   lab-network:
     driver: bridge
-  
+
+volumes:
+  alloy-data:
+  grafana-data:
+  loki-data:
+  prometheus-data:
