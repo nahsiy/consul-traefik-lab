@@ -58,4 +58,12 @@ ansible-playbook playbook.yml --check
 
 ## Idempotence
 
-Ansible est **idempotent** : relancer un playbook ne change rien si l'état est déjà correct.
+L'idempotence dépend des modules et des conditions du playbook. Ici, un ID
+stable évite de créer des doublons. Le PUT est rejoué avec remplacement des
+checks pour garantir leur définition : l'API de lecture ne restitue pas leur
+URL HTTP dans la version testée. Le bilan affiche donc volontairement
+`changed=1`, même au deuxième passage. L'état final est stable, mais ce n'est
+pas une exécution sans écriture.
+
+Le module `uri` ne simule pas les appels HTTP en mode `--check` : ce mode
+ne remplace ni `--syntax-check` ni une exécution contrôlée du labo.

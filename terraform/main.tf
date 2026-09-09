@@ -24,8 +24,8 @@ terraform {
   required_providers {
     # Provider Consul - permet d'interagir avec l'API Consul
     consul = {
-      source  = "hashicorp/consul"  # Editeur/nom du provider
-      version = "~> 2.20"           # Version compatible (>= 2.20.0, < 3.0.0)
+      source  = "hashicorp/consul" # Editeur/nom du provider
+      version = "~> 2.20"          # Version compatible (>= 2.20.0, < 3.0.0)
     }
   }
 }

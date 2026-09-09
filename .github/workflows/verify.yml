@@ -1,0 +1,63 @@
+---
+name: Verify
+
+'on':
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  static-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.13.3
+
+      - name: Install Ansible
+        run: >-
+          python3 -m pip install --disable-pip-version-check
+          ansible-core==2.19.2
+
+      - name: Validate repository
+        run: make verify
+
+  integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    strategy:
+      fail-fast: false
+      matrix:
+        registration: [terraform, ansible]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.13.3
+      - name: Install Ansible
+        run: python3 -m pip install --disable-pip-version-check ansible-core==2.19.2
+      - name: Start isolated lab
+        run: make up
+      - name: Register with Terraform
+        if: matrix.registration == 'terraform'
+        run: |
+          terraform -chdir=terraform init -input=false
+          terraform -chdir=terraform apply -auto-approve -input=false
+          terraform -chdir=terraform plan -detailed-exitcode -input=false
+      - name: Register with Ansible
+        if: matrix.registration == 'ansible'
+        run: make register-ansible
+      - name: Verify routing, metrics and fresh logs
+        run: make smoke REGISTRATION=${{ matrix.registration }}
+      - name: Verify outage and recovery
+        run: make test-outage REGISTRATION=${{ matrix.registration }}
+      - name: Stop lab
+        if: always()
+        run: make down

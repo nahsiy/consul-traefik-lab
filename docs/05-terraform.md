@@ -14,7 +14,7 @@ Terraform est un outil d'**Infrastructure as Code (IaC)** créé par HashiCorp (
 | **Question posée** | "Quelles actions exécuter ?" | "Quel état je veux ?" |
 | **Idempotence** | À gérer soi-même | Automatique |
 | **State** | Aucun | Fichier terraform.tfstate |
-| **Rollback** | Complexe | Facile (version précédente du state) |
+| **Retour arrière** | Rejouer une configuration adaptée | Revenir au code voulu puis examiner un nouveau plan ; restaurer le state seul ne restaure pas l'infrastructure |
 | **Force** | Config serveurs | Création d'infra |
 
 ### Exemple concret
@@ -31,9 +31,11 @@ Terraform est un outil d'**Infrastructure as Code (IaC)** créé par HashiCorp (
 ```hcl
 resource "consul_service" "nginx" {
   name = "nginx"
+  node = consul_node.nginx.name
   port = 80
 }
-# Terraform compare avec son state et applique les différences
+# Extrait : consul_node.nginx est déclaré dans terraform/services.tf.
+# Terraform compare la configuration, son state et l'état distant.
 ```
 
 ## Concepts fondamentaux
@@ -98,7 +100,7 @@ Les **outputs** affichent des informations après l'exécution :
 
 ```hcl
 output "service_url" {
-  value = "http://localhost:8500/v1/agent/service/${consul_service.nginx.name}"
+  value = "http://localhost:8500/v1/catalog/service/${consul_service.nginx.name}"
 }
 ```
 

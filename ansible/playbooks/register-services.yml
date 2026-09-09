@@ -1,33 +1,55 @@
 ---
-# TODO: Nom du playbook
 - name: Enregistrer les services dans Consul
-  # TODO: Sur quels hosts exécuter ?
   hosts: localhost
+  gather_facts: false
 
   vars:
     # Adresse de l'API Consul
     consul_url: "http://localhost:8500"
 
   tasks:
-    - name: Enregistrer nginx dans Consul avec tags Traefik
+    - name: Lire les services du catalogue
       ansible.builtin.uri:
-        url: "{{ consul_url }}/v1/agent/service/register"
+        url: "{{ consul_url }}/v1/catalog/service/nginx"
+        use_proxy: false
+        return_content: true
+      register: nginx_catalog
+
+    - name: Refuser de mélanger les parcours Terraform et Ansible
+      ansible.builtin.assert:
+        that:
+          - nginx_catalog.json | selectattr('Node', 'equalto', 'nginx-node') | list | length == 0
+        fail_msg: "Le parcours Terraform est actif. Faire make down puis make up avant de changer de parcours."
+
+    - name: Définir la configuration souhaitée
+      ansible.builtin.set_fact:
+        nginx_tags:
+          - "traefik.enable=true"
+          - "traefik.http.routers.nginx.rule=Host(`nginx.localhost`)"
+          - "traefik.http.routers.nginx.entrypoints=web"
+          - "traefik.http.routers.nginx.service=nginx"
+          - "traefik.http.services.nginx.loadbalancer.healthcheck.path=/"
+          - "traefik.http.services.nginx.loadbalancer.healthcheck.interval=5s"
+          - "traefik.http.services.nginx.loadbalancer.healthcheck.timeout=2s"
+
+    - name: Enregistrer nginx dans Consul avec un check HTTP exécuté par l'agent
+      ansible.builtin.uri:
+        url: "{{ consul_url }}/v1/agent/service/register?replace-existing-checks=true"
         method: PUT
+        use_proxy: false
         body:
+          ID: "nginx-lab"
           Name: "nginx"
           Port: 80
           Address: "nginx"
-          Tags:
-            - "traefik.enable=true"
-            - "traefik.http.routers.nginx.rule=Host(`nginx.localhost`)"
-            - "traefik.http.routers.nginx.entrypoints=web"
+          Tags: "{{ nginx_tags }}"
           Check:
+            CheckID: "nginx-http"
             HTTP: "http://nginx:80"
             Interval: "10s"
+            Timeout: "2s"
         body_format: json
         status_code: 200
-      register: result
-
-    - name: Afficher le résultat
-      ansible.builtin.debug:
-        msg: "✅ Service nginx enregistré dans Consul !"
+      # L'API de lecture masque la définition HTTP du check dans cette version.
+      # Rejouer le PUT remplace la définition; ne pas annoncer changed=0 à tort.
+      changed_when: true

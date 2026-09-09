@@ -61,5 +61,11 @@ variable "traefik_domain" {
   default     = "nginx.localhost"
 
   # 💡 Traefik route les requêtes selon le Host header
-  # curl -H "Host: nginx.localhost" http://localhost
+  # curl -H "Host: nginx.localhost" http://localhost:8088
+}
+
+variable "traefik_port" {
+  description = "Port local publié par Traefik"
+  type        = number
+  default     = 8088
 }

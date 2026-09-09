@@ -172,7 +172,7 @@
   <div class="container">
     <header>
       <h1>🚀 Consul-Traefik Lab</h1>
-      <p class="subtitle">Service Discovery & Dynamic Routing sur Mac M4</p>
+      <p class="subtitle">Service Discovery, Dynamic Routing & Observability</p>
     </header>
     
     <div class="services-grid">
@@ -214,12 +214,12 @@
       <h2>📐 Architecture</h2>
       <pre>
 ┌─────────────────────────────────────────────────────────────┐
-│                        Votre Mac M4                         │
+│                      Machine locale                        │
 └─────────────────────────────────────────────────────────────┘
                               │
          ┌────────────────────┼────────────────────┐
          ▼                    ▼                    ▼
-    :80 (Traefik)       :8081 (Dashboard)    :8500 (Consul)
+   :8088 (Traefik)      :8081 (Dashboard)    :8500 (Consul)
          │
          ▼
 ┌─────────────────┐   découvre    ┌─────────────────┐
@@ -237,7 +237,7 @@
     </div>
     
     <div style="text-align: center;">
-      <h3 style="margin-bottom: 15px; color: #8892b0;">Outils en cours d'apprentissage</h3>
+      <h3 style="margin-bottom: 15px; color: #8892b0;">Composants du laboratoire</h3>
       <div class="tools-learned">
         <span class="tool-badge active">🐳 Docker</span>
         <span class="tool-badge active">📦 Docker Compose</span>
@@ -249,7 +249,8 @@
     </div>
     
     <footer>
-      <p>Lab créé le 29 novembre 2025 • Prochaine étape : Ansible pour automatiser l'enregistrement des services</p>
+      <p>Laboratoire local : découverte Consul, routage Traefik, Terraform/Ansible et observabilité.</p>
+      <p>Les pastilles sont décoratives. Consulter les interfaces et lancer make smoke pour vérifier l'état réel.</p>
     </footer>
   </div>
 </body>
