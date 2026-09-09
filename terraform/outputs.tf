@@ -19,17 +19,16 @@
 
 output "nginx_node" {
   description = "Node du service Nginx dans Consul"
-  value       = consul_catalog_entry.nginx.node
+  value       = consul_node.nginx.name
 
   # 💡 Vérifiez dans l'UI Consul : http://localhost:8500/ui/dc1/nodes
 }
 
 output "nginx_url" {
   description = "URL pour accéder à Nginx via Traefik"
-  value       = "http://${var.traefik_domain}"
+  value       = "http://${var.traefik_domain}:${var.traefik_port}"
 
-  # 💡 N'oubliez pas d'ajouter nginx.localhost à /etc/hosts
-  # ou utilisez : curl -H "Host: nginx.localhost" http://localhost
+  # Le domaine .localhost est résolu automatiquement vers l'interface locale.
 }
 
 # ----------------------------------------------------------------------------

@@ -17,9 +17,6 @@ crash.*.log
 # Répertoire des providers téléchargés
 .terraform/
 
-# Lock file des providers (on peut le commiter, mais optionnel pour un lab)
-.terraform.lock.hcl
-
 # Fichiers de plan sauvegardés
 *.tfplan
 
