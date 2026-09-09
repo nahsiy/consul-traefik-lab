@@ -1,5 +1,3 @@
-# TODO: Définir localhost comme cible
-# Indice: ansible_connection=local pour exécuter en local
 all:
   hosts:
     localhost:
