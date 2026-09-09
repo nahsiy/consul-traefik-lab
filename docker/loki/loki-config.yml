@@ -1,7 +1,7 @@
 # ============================================
 # LOKI - Configuration
 # ============================================
-# Loki stocke et indexe les logs reçus de Promtail
+# Loki stocke et indexe les logs reçus de Grafana Alloy
 # C'est comme Prometheus, mais pour les logs au lieu des métriques
 
 auth_enabled: false
