@@ -32,5 +32,10 @@ curl http://localhost:8500/v1/kv/ma/cle?raw
 
 ## Modes
 
+Dans ce dépôt, Terraform écrit dans le catalogue sans agent associé à Nginx :
+aucun check Consul n'y est exécuté. Ansible utilise l'API agent et y enregistre
+un vrai contrôle HTTP. Traefik effectue également un contrôle HTTP du backend
+dans les deux parcours. Voir le README pour le test de panne reproductible.
+
 - **`-dev`** : Développement (données en mémoire, 1 seul nœud)
 - **`-server`** : Production (cluster, données persistantes)

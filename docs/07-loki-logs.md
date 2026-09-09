@@ -21,7 +21,7 @@ C'est comme Prometheus, mais pour les **logs** au lieu des métriques.
 │   Nginx     │──┐
 └─────────────┘  │
 ┌─────────────┐  │    ┌─────────────┐    ┌─────────────┐
-│   Traefik   │──┼───►│  Promtail   │───►│    Loki     │
+│   Traefik   │──┼───►│    Alloy    │───►│    Loki     │
 └─────────────┘  │    │ (collecteur)│    │  (stockage) │
 ┌─────────────┐  │    └─────────────┘    └──────┬──────┘
 │   Consul    │──┘                              │
@@ -36,7 +36,7 @@ C'est comme Prometheus, mais pour les **logs** au lieu des métriques.
 
 | Composant | Rôle | Équivalent Prometheus |
 |-----------|------|----------------------|
-| **Promtail** | Collecte les logs | Agent qui scrape |
+| **Grafana Alloy** | Collecte et traite les logs | Agent de collecte |
 | **Loki** | Stocke et indexe | Prometheus server |
 | **Grafana** | Visualise | Grafana |
 
@@ -64,7 +64,7 @@ LogQL est le langage de requête de Loki (comme PromQL pour Prometheus).
 {service=~"nginx|traefik"}
 
 # Tous les logs du projet
-{project="docker"}
+{compose_project="consul-traefik-lab"}
 ```
 
 #### Filtrer le contenu
@@ -102,15 +102,16 @@ LogQL est le langage de requête de Loki (comme PromQL pour Prometheus).
 {service="consul"} != "health"
 
 # Tous les logs des 5 dernières minutes avec "fail"
-{project="docker"} |= "fail"
+{compose_project="consul-traefik-lab"} |= "fail"
 ```
 
 ## Configuration
 
-### Promtail (collecteur)
-Fichier : `docker/promtail/promtail-config.yml`
+### Grafana Alloy (collecteur)
+Fichier : `docker/alloy/config.alloy`
 
-Promtail se connecte au socket Docker et collecte automatiquement les logs de tous les conteneurs.
+Alloy découvre les conteneurs du projet Compose, lit leurs logs via le socket
+Docker, extrait leurs métadonnées et les transmet à Loki.
 
 ### Loki (stockage)
 Fichier : `docker/loki/loki-config.yml`
@@ -122,13 +123,13 @@ Configuration du stockage et de l'indexation des logs.
 ### Avant
 ```bash
 # Voir les logs d'un conteneur
-docker logs docker-nginx-1
+docker logs consul-traefik-lab-nginx-1
 
 # Suivre en temps réel
-docker logs -f docker-nginx-1
+docker logs -f consul-traefik-lab-nginx-1
 
 # Filtrer (limité)
-docker logs docker-nginx-1 2>&1 | grep error
+docker logs consul-traefik-lab-nginx-1 2>&1 | grep error
 ```
 
 ### Avec Loki + Grafana
@@ -143,7 +144,7 @@ docker logs docker-nginx-1 2>&1 | grep error
 ### 1. Debug d'une erreur
 ```logql
 # Chercher les erreurs dans tous les services
-{project="docker"} |= "error" or {project="docker"} |= "Error"
+{compose_project="consul-traefik-lab"} |~ "(?i)error"
 ```
 
 ### 2. Analyser le trafic
@@ -155,7 +156,7 @@ docker logs docker-nginx-1 2>&1 | grep error
 ### 3. Surveiller un déploiement
 ```logql
 # Logs des 5 dernières minutes
-{project="docker"}
+{compose_project="consul-traefik-lab"}
 ```
 Puis dans Grafana, ajuster la plage de temps en haut à droite.
 
@@ -205,4 +206,4 @@ Affichez les logs Traefik sans les lignes de health check.
 
 - 📖 [Loki Documentation](https://grafana.com/docs/loki/latest/)
 - 📖 [LogQL Documentation](https://grafana.com/docs/loki/latest/logql/)
-- 📖 [Promtail Configuration](https://grafana.com/docs/loki/latest/clients/promtail/configuration/)
+- 📖 [Collecte Docker avec Alloy](https://grafana.com/docs/alloy/latest/reference/components/loki/loki.source.docker/)

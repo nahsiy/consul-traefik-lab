@@ -114,17 +114,17 @@ Un dashboard "Traefik - Consul-Traefik Lab" est déjà disponible avec :
 ## Génerer du trafic pour tester
 
 ```bash
-# Faire 100 requêtes via Traefik (port 80)
-for i in {1..100}; do curl -s -H "Host: nginx.localhost" http://localhost > /dev/null; done
+# Faire 100 requêtes via Traefik (port 8088)
+for i in {1..100}; do curl -s -H "Host: nginx.localhost" http://localhost:8088 > /dev/null; done
 
 # Requêtes en boucle (Ctrl+C pour arrêter)
-while true; do curl -s -H "Host: nginx.localhost" http://localhost > /dev/null; sleep 0.1; done
+while true; do curl -s -H "Host: nginx.localhost" http://localhost:8088 > /dev/null; sleep 0.1; done
 
 # Simuler des erreurs 404
-for i in {1..10}; do curl -s -H "Host: nginx.localhost" http://localhost/inexistant > /dev/null; done
+for i in {1..10}; do curl -s -H "Host: nginx.localhost" http://localhost:8088/inexistant > /dev/null; done
 ```
 
-> ⚠️ **Important** : Les requêtes doivent passer par Traefik (port 80) pour générer des métriques.
+> ⚠️ **Important** : Les requêtes doivent passer par Traefik (port 8088) pour générer des métriques.
 > Les requêtes directes sur Nginx (port 8080) ne sont pas comptabilisées.
 
 ## Configuration Prometheus
